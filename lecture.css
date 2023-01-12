@@ -1,0 +1,23 @@
+.rise-enabled {
+    background-color: #fff;
+}
+
+#rise-header {
+    width: 100%;
+    text-align: right;
+}
+
+#rise-header img {
+    width: 15%;
+    margin-top: 1em;
+}
+
+#rise-footer {
+    width: 100%;
+}
+
+#rise-footer p {
+    margin-top: 1em;
+    margin-bottom: 3.4em;
+    text-align: center;
+}

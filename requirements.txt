@@ -1,0 +1,10 @@
+numpy ==1.21.6
+scipy ==1.7.3
+pip ==22.2.2
+matplotlib ==3.5.3
+seaborn ==0.12.0
+notebook ==6.5.2
+rise ==5.7.1
+
+tqdm ==4.64.1
+ipywidgets ==8.0.2
