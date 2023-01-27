@@ -1,35 +1,145 @@
-from typing import Optional
+from typing import Optional, Union
 
+import gpytorch
 import gym
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from botorch.acquisition import AcquisitionFunction
 from botorch.exceptions.errors import UnsupportedError
-from botorch.models import ModelListGP
+from botorch.models import ModelListGP, SingleTaskGP
 from botorch.models.gpytorch import BatchedMultiOutputGPyTorchModel
 from botorch.models.model import Model
 from botorch.models.transforms.input import InputTransform
 from botorch.utils import t_batch_mode_transform
+from gpytorch.models import ExactGP
 from gym.spaces.utils import unflatten
 from torch import Tensor
 from torch.nn import Module
 
 
-def get_new_bound(env: gym.Env, current_action, stepsize: float):
+def sample_gp_prior_plot(
+    model: Union[ExactGP, SingleTaskGP],
+    test_X,
+    n_samples: int = 5,
+    ax=None,
+    y_lim: Optional[tuple] = None,
+):
+    with gpytorch.settings.prior_mode(True):
+        model.eval()
+        preds = model(test_X)
+
+    # Plotting
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot()
+    prior_mean = preds.mean.detach().numpy()
+    prior_std = preds.stddev.detach().numpy()
+    ax.plot(test_X, prior_mean, label="GP mean")
+    ax.fill_between(
+        test_X,
+        prior_mean - 2 * prior_std,
+        prior_mean + 2 * prior_std,
+        alpha=0.2,
+        label=r"2$\sigma$ confidence bound",
+    )
+    for i in range(n_samples):
+        y_sample = preds.sample()
+        ax.plot(test_X, y_sample, ls=":")
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_title("Samples drawn from the prior Gaussian process")
+    if y_lim is not None:
+        ax.set_ylim(y_lim)
+    ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+    return ax
+
+
+def sample_gp_posterior_plot(
+    model: Union[ExactGP, SingleTaskGP],
+    test_X,
+    n_samples: int = 5,
+    ax=None,
+    y_lim: Optional[tuple] = None,
+    show_true_f: bool = False,
+    true_f_x=None,
+    true_f_y=None,
+):
+    with gpytorch.settings.prior_mode(False):
+        model.eval()
+        preds = model(test_X)
+
+    # Plotting
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot()
+    prior_mean = preds.mean.detach().numpy()
+    prior_std = preds.stddev.detach().numpy()
+    ax.plot(test_X, prior_mean, label="GP mean")
+    ax.fill_between(
+        test_X,
+        prior_mean - 2 * prior_std,
+        prior_mean + 2 * prior_std,
+        alpha=0.2,
+        label=r"2$\sigma$ confidence bound",
+    )
+    for i in range(n_samples):
+        y_sample = preds.sample()
+        ax.plot(test_X, y_sample, ls=":")
+    # Add observed data
+    ax.plot(
+        model.train_inputs[0].flatten(),
+        model.train_targets,
+        color="black",
+        ls="",
+        marker="*",
+        label="Data points",
+    )
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_title("Gaussian Process Posterior")
+    if y_lim is not None:
+        ax.set_ylim(y_lim)
+    ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+    return ax
+
+
+def plot_acq_with_gp(model, train_x, train_y, acq, test_X):
+    test_acq_values = acq(test_X.reshape(-1, 1, 1)).detach().numpy()
+    preds_mean = model(test_X).mean.detach().numpy()
+    preds_sigma = model(test_X).stddev.detach().numpy()
+    plt.plot(test_X, preds_mean, label="GP mean")
+    plt.fill_between(
+        test_X,
+        preds_mean - 2 * preds_sigma,
+        preds_mean + 2 * preds_sigma,
+        alpha=0.3,
+        label=r"$2\sigma$ confidence",
+    )
+    plt.plot(train_x, train_y, ls="", marker="*", color="black", label="Data points")
+    plt.plot(test_X, test_acq_values, color="slategrey", label="UCB acq")
+    x_next = test_X[np.argmax(test_acq_values)]
+    y_next = test_acq_values.max()
+    plt.plot(x_next, y_next, ls="", marker="o", color="magenta", label="max(acq)")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+
+
+def get_new_bound(env, current_action, stepsize):
     bounds = np.array([env.action_space.low, env.action_space.high])
     bounds = stepsize * bounds + current_action
     bounds = np.clip(bounds, env.action_space.low, env.action_space.high)
     return bounds
 
 
-def scale_action(env: gym.Env, observation, filter_action=None):
+def scale_action(env, observation, filter_action=None):
     """Scale the observed magnet settings to proper action values"""
-    # unflattened = (
-    #     unflatten(env.unwrapped.observation_space, observation)
-    #     if not isinstance(observation, dict)
-    #     else observation
-    # )
-    unflattened = unflatten(env.unwrapped.observation_space, observation)
+    unflattened = (
+        unflatten(env.unwrapped.observation_space, observation)
+        if not isinstance(observation, dict)
+        else observation
+    )
     magnet_values = unflattened["magnets"]
     action_values = []
     if filter_action is None:

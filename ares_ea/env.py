@@ -203,47 +203,6 @@ class ARESEA(gym.Env):
         pixel_size = np.array(self.simulation.Screen.pixel_size)
         resolution = np.array(self.simulation.Screen.resolution)
 
-        # # Redraw beam image as if it were binning = 4
-        # render_resolution = (resolution * binning / 4).astype("int")
-
-        # img = self.get_beam_image()
-        # img = img / 2**12 * 255
-        # img = img.clip(0, 255).astype(np.uint8)
-        # img = np.repeat(img[:, :, np.newaxis], 3, axis=-1)
-
-        # # Draw desired ellipse
-        # tb = self.target_beam
-        # e_pos_x = int(tb[0] / pixel_size[0] + render_resolution[0] / 2)
-        # e_width_x = int(tb[1] / pixel_size[0])
-        # e_pos_y = int(-tb[2] / pixel_size[1] + render_resolution[1] / 2)
-        # e_width_y = int(tb[3] / pixel_size[1])
-
-        # target_beam_ellipse = Ellipse(
-        #     xy=(e_pos_x, e_pos_y),
-        #     width=2 * e_width_x,
-        #     height=2 * e_width_y,
-        #     angle=0,
-        #     color="blue",
-        # )
-
-        # # Draw Current beam ellipse
-        # # Draw desired ellipse
-        # cb = self.get_beam_parameters()
-        # e_pos_x = int(cb[0] / pixel_size[0] + render_resolution[0] / 2)
-        # e_width_x = int(cb[1] / pixel_size[0])
-        # e_pos_y = int(-cb[2] / pixel_size[1] + render_resolution[1] / 2)
-        # e_width_y = int(cb[3] / pixel_size[1])
-        # target_beam_ellipse = Ellipse(
-        #     xy=(e_pos_x, e_pos_y),
-        #     width=2 * e_width_x,
-        #     height=2 * e_width_y,
-        #     angle=0,
-        #     color="red",
-        # )
-
-        # self.axs[-1].imshow(img)
-        # self.axs[-1].add_patch(target_beam_ellipse)
-
         # Plot action
         plot_quadrupole_history(self.axs[0], self.history)
         plot_steerer_history(self.axs[1], self.history)
@@ -264,7 +223,7 @@ class ARESEA(gym.Env):
         plot_beam_image(self.axs[2], self.get_beam_image(), resolution, pixel_size)
         self.axs[2].add_patch(tb_ellipse)
 
-        self.fig.tight_layout()
+        self.fig.tight_layout(pad=0.5)
 
         if mode == "human":
             plt.show()
@@ -278,155 +237,6 @@ class ARESEA(gym.Env):
             )
 
             return image_from_plot
-
-    # def render(self, mode: str = "human") -> Optional[np.ndarray]:
-    #     assert mode == "rgb_array" or mode == "human"
-
-    #     if not hasattr(self, "fig"):
-    #         self.fig, self.axs = plt.subplots(1, 3, figsize=(18, 6))
-    #     for ax in self.axs:
-    #         ax.clear()
-
-    #     # Beam Image Plot
-    #     binning = np.array(self.simulation.Screen.binning)
-    #     pixel_size = np.array(self.simulation.Screen.pixel_size) * binning
-    #     resolution = np.array(self.simulation.Screen.resolution) / binning
-
-    #     # Read screen image and make 8-bit RGB
-    #     img = self.get_beam_image()
-    #     img = img / 2**12 * 255
-    #     img = img.clip(0, 255).astype(np.uint8)
-    #     img = np.repeat(img[:, :, np.newaxis], 3, axis=-1)
-
-    #     # Redraw beam image as if it were binning = 4
-    #     render_resolution = (resolution * binning / 4).astype("int")
-    #     img = cv2.resize(img, render_resolution)
-
-    #     # Draw desired ellipse
-    #     tb = self.target_beam
-    #     pixel_size_b4 = pixel_size / binning * 4
-    #     e_pos_x = int(tb[0] / pixel_size_b4[0] + render_resolution[0] / 2)
-    #     e_width_x = int(tb[1] / pixel_size_b4[0])
-    #     e_pos_y = int(-tb[2] / pixel_size_b4[1] + render_resolution[1] / 2)
-    #     e_width_y = int(tb[3] / pixel_size_b4[1])
-    #     blue = (255, 204, 79)
-    #     img = cv2.ellipse(
-    #         img, (e_pos_x, e_pos_y), (e_width_x, e_width_y), 0, 0, 360, blue, 2
-    #     )
-
-    #     # Draw beam ellipse
-    #     cb = self.get_beam_parameters()
-    #     pixel_size_b4 = pixel_size / binning * 4
-    #     e_pos_x = int(cb[0] / pixel_size_b4[0] + render_resolution[0] / 2)
-    #     e_width_x = int(cb[1] / pixel_size_b4[0])
-    #     e_pos_y = int(-cb[2] / pixel_size_b4[1] + render_resolution[1] / 2)
-    #     e_width_y = int(cb[3] / pixel_size_b4[1])
-    #     red = (0, 0, 255)
-    #     img = cv2.ellipse(
-    #         img, (e_pos_x, e_pos_y), (e_width_x, e_width_y), 0, 0, 360, red, 2
-    #     )
-
-    #     # Adjust aspect ratio
-    #     new_width = int(img.shape[1] * pixel_size_b4[0] / pixel_size_b4[1])
-    #     img = cv2.resize(img, (new_width, img.shape[0]))
-
-    #     # Add magnet values and beam parameters
-    #     magnets = self.magnets
-    #     padding = np.full(
-    #         (int(img.shape[0] * 0.27), img.shape[1], 3), fill_value=255, dtype=np.uint8
-    #     )
-    #     img = np.vstack([img, padding])
-    #     black = (0, 0, 0)
-    #     red = (0, 0, 255)
-    #     green = (0, 255, 0)
-    #     img = cv2.putText(
-    #         img, f"Q1={magnets[0]:.2f}", (15, 545), cv2.FONT_HERSHEY_SIMPLEX, 1, black
-    #     )
-    #     img = cv2.putText(
-    #         img, f"Q2={magnets[1]:.2f}", (215, 545), cv2.FONT_HERSHEY_SIMPLEX, 1, black
-    #     )
-    #     img = cv2.putText(
-    #         img,
-    #         f"CV={magnets[2]*1e3:.2f}",
-    #         (415, 545),
-    #         cv2.FONT_HERSHEY_SIMPLEX,
-    #         1,
-    #         black,
-    #     )
-    #     img = cv2.putText(
-    #         img, f"Q3={magnets[3]:.2f}", (615, 545), cv2.FONT_HERSHEY_SIMPLEX, 1, black
-    #     )
-    #     img = cv2.putText(
-    #         img,
-    #         f"CH={magnets[4]*1e3:.2f}",
-    #         (15, 585),
-    #         cv2.FONT_HERSHEY_SIMPLEX,
-    #         1,
-    #         black,
-    #     )
-    #     mu_x_color = black
-    #     if self.threshold != np.inf:
-    #         mu_x_color = green if abs(cb[0] - tb[0]) < self.threshold else red
-    #     img = cv2.putText(
-    #         img,
-    #         f"mx={cb[0]*1e3:.2f}",
-    #         (15, 625),
-    #         cv2.FONT_HERSHEY_SIMPLEX,
-    #         1,
-    #         mu_x_color,
-    #     )
-    #     sigma_x_color = black
-    #     if self.threshold != np.inf:
-    #         sigma_x_color = green if abs(cb[1] - tb[1]) < self.threshold else red
-    #     img = cv2.putText(
-    #         img,
-    #         f"sx={cb[1]*1e3:.2f}",
-    #         (215, 625),
-    #         cv2.FONT_HERSHEY_SIMPLEX,
-    #         1,
-    #         sigma_x_color,
-    #     )
-    #     mu_y_color = black
-    #     if self.threshold != np.inf:
-    #         mu_y_color = green if abs(cb[2] - tb[2]) < self.threshold else red
-    #     img = cv2.putText(
-    #         img,
-    #         f"my={cb[2]*1e3:.2f}",
-    #         (415, 625),
-    #         cv2.FONT_HERSHEY_SIMPLEX,
-    #         1,
-    #         mu_y_color,
-    #     )
-    #     sigma_y_color = black
-    #     if self.threshold != np.inf:
-    #         sigma_y_color = green if abs(cb[3] - tb[3]) < self.threshold else red
-    #     img = cv2.putText(
-    #         img,
-    #         f"sy={cb[3]*1e3:.2f}",
-    #         (615, 625),
-    #         cv2.FONT_HERSHEY_SIMPLEX,
-    #         1,
-    #         sigma_y_color,
-    #     )
-
-    #     self.axs[-1].imshow(img)
-
-    #     # Plot quadrupole
-    #     plot_quadrupole_history(self.axs[0], self.history)
-    #     plot_steerer_history(self.axs[1], self.history)
-
-    #     if mode == "human":
-    #         plt.show()
-    #     elif mode == "rgb_array":
-    #         self.fig.canvas.draw()
-    #         image_from_plot = np.frombuffer(
-    #             self.fig.canvas.tostring_rgb(), dtype=np.uint8
-    #         )
-    #         image_from_plot = image_from_plot.reshape(
-    #             self.fig.canvas.get_width_height()[::-1] + (3,)
-    #         )
-
-    #         return image_from_plot
 
     def get_beam_image(self) -> np.ndarray:
         # Beam image to look like real image by dividing by goodlooking number and
