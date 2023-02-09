@@ -75,7 +75,7 @@ def sample_gp_posterior_plot(
         ax = fig.add_subplot()
     prior_mean = preds.mean.detach().numpy()
     prior_std = preds.stddev.detach().numpy()
-    ax.plot(test_X, prior_mean, label="GP mean")
+    ax.plot(test_X, prior_mean, label="GP mean", lw=4)
     ax.fill_between(
         test_X,
         prior_mean - 2 * prior_std,
@@ -93,10 +93,14 @@ def sample_gp_posterior_plot(
         color="black",
         ls="",
         marker="*",
+        markersize=12,
         label="Data points",
     )
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
+    # Add true objective
+    if show_true_f:
+        ax.plot(true_f_x,true_f_y,":", label="True objective", color='orange', lw=4)
+    ax.set_xlabel("X feature")
+    ax.set_ylabel("Y target")
     ax.set_title("Gaussian Process Posterior")
     if y_lim is not None:
         ax.set_ylim(y_lim)
@@ -104,7 +108,7 @@ def sample_gp_posterior_plot(
     return ax
 
 
-def plot_acq_with_gp(model, train_x, train_y, acq, test_X):
+def plot_acq_with_gp(model, train_x, train_y, acq, test_X,show_true_f: bool = False, true_f_x=None, true_f_y=None,):
     test_acq_values = acq(test_X.reshape(-1, 1, 1)).detach().numpy()
     preds_mean = model(test_X).mean.detach().numpy()
     preds_sigma = model(test_X).stddev.detach().numpy()
@@ -116,13 +120,16 @@ def plot_acq_with_gp(model, train_x, train_y, acq, test_X):
         alpha=0.3,
         label=r"$2\sigma$ confidence",
     )
-    plt.plot(train_x, train_y, ls="", marker="*", color="black", label="Data points")
-    plt.plot(test_X, test_acq_values, color="slategrey", label="UCB acq")
+    plt.plot(train_x, train_y, ls="", marker="*", markersize=12, color="black", label="Data points")
+    # Add true objective
+    if show_true_f:
+        plt.plot(true_f_x, true_f_y, ":", color='orange', label="True objective", lw=4)
+    plt.plot(test_X, test_acq_values, color="red", label="Acq")
     x_next = test_X[np.argmax(test_acq_values)]
     y_next = test_acq_values.max()
-    plt.plot(x_next, y_next, ls="", marker="o", color="magenta", label="max(acq)")
-    plt.xlabel("X")
-    plt.ylabel("Y")
+    plt.plot(x_next, y_next, ls="", marker="o", markersize=12, color="magenta", label="max(acq)")
+    plt.xlabel("X feature")
+    plt.ylabel("Y target")
     plt.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
 
 

@@ -58,7 +58,7 @@ warnings.filterwarnings("ignore")
 #     },
 # )
 # sns.set(rc={'figure.figsize': (18, 20)})
-plt.rcParams['figure.figsize'] = 12, 9
+plt.rcParams['figure.figsize'] = 12, 7
 plt.rcParams['savefig.dpi'] = 300
 plt.rcParams['image.cmap'] = "viridis"
 plt.rcParams['image.interpolation'] = "none"
