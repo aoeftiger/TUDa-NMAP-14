@@ -5,6 +5,7 @@ import cheetah
 import gym
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 from gym import spaces
 from matplotlib.patches import Ellipse
 
@@ -115,7 +116,7 @@ class ARESEA(gym.Env):
         )
         Screen.is_active = True
         lattice_cell = [Q1, D1, Q2, D2, CV, D3, Q3, D4, CH, D5, Screen]
-        self.simulation = cheetah.Segment(cell=lattice_cell)
+        self.simulation = cheetah.Segment(cell=lattice_cell, device=torch.device("cpu"))
 
     def step(self, action):
         # Set magnet values
