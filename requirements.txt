@@ -1,4 +1,5 @@
 botorch
+cheetah-accelerator
 gym 
 matplotlib
 notebook
