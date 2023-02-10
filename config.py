@@ -16,7 +16,8 @@ from botorch.acquisition import (
     ProbabilityOfImprovement,
     UpperConfidenceBound,
 )
-from botorch.fit import fit_gpytorch_mll
+# from botorch.fit import fit_gpytorch_mll
+from botorch.fit import fit_gpytorch_model
 from botorch.models import SingleTaskGP
 from botorch.models.transforms import Standardize
 from botorch.optim import optimize_acqf
