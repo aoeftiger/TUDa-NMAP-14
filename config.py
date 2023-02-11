@@ -16,8 +16,13 @@ from botorch.acquisition import (
     ProbabilityOfImprovement,
     UpperConfidenceBound,
 )
-# from botorch.fit import fit_gpytorch_mll
-from botorch.fit import fit_gpytorch_model
+
+try:
+    from botorch.fit import fit_gpytorch_mll
+except ImportError:
+    print("You are using a botorch version older than 0.7.2, aliasing the legacy `fit_gpytorch_model` function")
+    from botorch.fit import fit_gpytorch_model as fit_gpytorch_mll
+
 from botorch.models import SingleTaskGP
 from botorch.models.transforms import Standardize
 from botorch.optim import optimize_acqf

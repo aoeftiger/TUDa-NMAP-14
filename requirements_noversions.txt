@@ -1,13 +1,13 @@
 botorch
 cheetah-accelerator
-gym
+gym 
+matplotlib
 notebook
 numpy
-matplotlib
 rise
 scipy
 seaborn
-tqdm
 torch
+tqdm
 ipython
 ipywidgets
