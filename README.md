@@ -2,7 +2,7 @@
 
 MSc lecture at TU Darmstadt, etit, TEMF by Adrian Oeftiger in 2022/23.
 
-Fourteenth part of a jupyter notebook lecture series, guest lecture held by Dr. Andrea Santamaria Garcia on 10.02.2023.
+Fourteenth part of a jupyter notebook lecture series, guest lecture held by Dr. Andrea Santamaria Garcia and Chenran Xu on 10.02.2023.
 
 Find the rendered HTML slides [here](https://aoeftiger.github.io/TUDa-NMAP-14/).
 
