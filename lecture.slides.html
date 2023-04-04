@@ -15469,6 +15469,7 @@ The GP just has a constant mean with some uncertainty.
 <li>Another approach is to dynamically <strong>adapt / fit</strong> the hyperparameters to the data.</li>
 </ul>
 <p>In BoTorch there is a convenient helper function <a href="https://botorch.org/api/fit.html#botorch.fit"><code>fit_gpytorch_mll</code></a> to fit the hyperparameters of the <em>Gaussian process</em> model to the data using <em>marginal log-likelihood</em> fits.</p>
+<p><em>Note:</em> <code>fit_gpytorch_mll</code> is introduced in botorch version <code>0.7.2</code>, if you are using a older python and botorch version, you can use the alternative <code>fit_gpytorch_model</code> function, which will be deprecated for future release.</p>
 <ul>
 <li>In this approach, the hyperparameters are varied until the likelihood is maximized</li>
 </ul>
@@ -15525,6 +15526,7 @@ The GP just has a constant mean with some uncertainty.
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">fit_gpytorch_mll</span><span class="p">(</span><span class="n">mll</span><span class="p">);</span>  <span class="c1"># carries out the fit</span>
+<span class="c1"># fit_gpytorch_model(mll);  # obsolete with new version</span>
 </pre></div>
 
      </div>
@@ -16221,24 +16223,24 @@ f(x) &amp;= -\log(\mathrm{MAE}(b_\mathrm{current},b_\mathrm{target})) \\
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h2 id="Summary">Summary<a class="anchor-link" href="#Summary">&#182;</a></h2><ul>
-<li><p>Bayesian Optimization is a numerical <em>global</em> optimization method for black-box functions.</p>
+<li><p>Bayesian Optimization (BO) is a numerical <em>global</em> optimization method for black-box functions.</p>
 </li>
-<li><p>BO uses a <em>Gaussian process</em> as a statistical surrogate model of the objective.</p>
+<li><p>BO uses a <em>Gaussian process</em> (GP) as a statistical surrogate model of the objective.</p>
 <ul>
-<li>GP is characterized by its mean and covariance (kernel) function.</li>
-<li>Hyperparamters can be dynamically fitted to the data.</li>
+<li>a GP is characterized by its mean and covariance (kernel) function.</li>
+<li>Hyperparameters can be dynamically fitted to the data.</li>
 <li>Prior knowledge can be included for setting the priors.</li>
 </ul>
 </li>
-<li><p>BO uses the <em>acquisition function</em> to guide the optimziation</p>
+<li><p>BO uses the <em>acquisition function</em> to guide the optimization</p>
 <ul>
-<li>One should choose an acquisition suitable for the task.</li>
-<li>Hyperparameters of the acquisition function also affects the optimization behaviour.</li>
+<li>One should choose an acquisition function suitable for the task.</li>
+<li>Hyperparameters of the acquisition function also affect the optimization behaviour.</li>
 </ul>
 </li>
-<li><p>BO is an <strong>optimization</strong> method. It is not designed for a <em>control</em> task.</p>
+<li><p>BO is an <strong>optimization</strong> method and not designed for <em>control</em> tasks.</p>
 </li>
-<li><p>It is adequate for a moderate amount of dimensions (~100)</p>
+<li><p>BO is adequate for a moderate amount of dimensions (~100)</p>
 </li>
 </ul>
 
