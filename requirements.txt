@@ -1,6 +1,6 @@
 botorch==0.8.1
 cheetah-accelerator==0.5.18
-gym==0.21.0
+gym==0.26.2
 matplotlib==3.5.3
 notebook==6.5.2
 numpy==1.21.6
